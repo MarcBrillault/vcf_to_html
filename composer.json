@@ -1,0 +1,19 @@
+{
+    "name": "embryo/vcf_to_html",
+    "type": "project",
+    "require": {
+        "twig/twig": "^2.15"
+    },
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Marc Brillault",
+            "email": "marc@brillault.fr"
+        }
+    ]
+}
