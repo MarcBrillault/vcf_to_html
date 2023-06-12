@@ -7,31 +7,32 @@
         <div class="container-lg">
             <h1>Tous les contacts ({{ cards|length }})</h1>
             <div class="row">
+                {% for letter, cards in sorted_cards %}
+                    <h2>{{ letter }}</h2>
+                    {% for card in cards %}
+                    <div class="card" style="width: 18rem;">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ card.getFullname }}</h5>
 
-                {% for card in cards %}
-                <div class="card" style="width: 18rem;">
-                    <div class="card-body">
-                        <h5 class="card-title">{{ card.getFullname }}</h5>
-                        {# <h6 class="card-subtitle mb-2 text-body-secondary">Card subtitle</h6> #}
+                            {% if card.getTels|length > 0 %}
+                            <ul>
+                                {% for tel in card.getTels %}
+                                <li>{{ tel }}</li>
+                                {% endfor %}
+                            </ul>
+                            {% endif %}
 
-                        {% if card.getTels|length > 0 %}
-                        <ul>
-                            {% for tel in card.getTels %}
-                            <li>{{ tel }}</li>
-                            {% endfor %}
-                        </ul>
-                        {% endif %}
-
-                        {% if card.getEmails|length > 0 %}
-                        <ul>
-                            {% for email in card.getEmails %}
-                            <li>{{ email }}</li>
-                            {% endfor %}
-                        </ul>
-                        {% endif %}
-                    
+                            {% if card.getEmails|length > 0 %}
+                            <ul>
+                                {% for email in card.getEmails %}
+                                <li>{{ email }}</li>
+                                {% endfor %}
+                            </ul>
+                            {% endif %}
+                        
+                        </div>
                     </div>
-                </div>
+                    {% endfor %}
                 {% endfor %}
             </div>
         </div>

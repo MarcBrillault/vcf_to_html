@@ -18,10 +18,19 @@ usort($cards, function ($a, $b) {
     return $a->getLastName() > $b->getLastName();
 });
 
+$sortedCards = [];
+foreach ($cards as $card) {
+    $firstLetter = mb_strtoupper(substr($card->getLastName(), 0, 1));
+    if (preg_match('/^[0-9]$/', $firstLetter)) {
+        $firstLetter = '0-9';
+    }
+    $sortedCards[$firstLetter][] = $card;
+}
+
 $loader = new FilesystemLoader(__DIR__ . '/templates');
 $twig = new Environment($loader);
 
-echo $twig->render('vcf.html.twig', ['cards' => $cards]);
+echo $twig->render('vcf.html.twig', ['cards' => $cards, 'sorted_cards' => $sortedCards]);
 
 function splitVcardData(string $file): array
 {

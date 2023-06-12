@@ -114,7 +114,7 @@ class vCard
         if ($this->lastName !== null) {
             if ($this->firstName === null) {
                 list(, $last) = explode(' ', $this->lastName);
-                return trim($last);
+                return trim($last, ' /(-');
             }
         }
 
@@ -123,7 +123,7 @@ class vCard
             if (strpos($this->fullName, ' ') !== false) {
                 list(, $last) = explode(' ', $this->fullName);
                 if ($last !== '') {
-                    return trim($last);
+                    return trim($last, ' /(-');
                 }
             }
 
@@ -135,7 +135,7 @@ class vCard
             return 'prout';
             list(, $last) = explode(' ', $this->firstName);
             if ($last !== null) {
-                return trim($last);
+                return trim($last, ' /(-');
             }
         }
 
