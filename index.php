@@ -14,12 +14,14 @@ $file = __DIR__ . "/vcards.vcf";
 $vcardData = splitVcardData($file);
 
 $cards = getVcardsFromArray($vcardData);
+usort($cards, function ($a, $b) {
+    return $a->getLastName() > $b->getLastName();
+});
 
 $loader = new FilesystemLoader(__DIR__ . '/templates');
 $twig = new Environment($loader);
 
 echo $twig->render('vcf.html.twig', ['cards' => $cards]);
-
 
 function splitVcardData(string $file): array
 {
@@ -33,7 +35,7 @@ function splitVcardData(string $file): array
 function getField(string $fieldName, string $data, bool $multiple = false)
 {
     $field = [];
-    $regex = sprintf('/%s(?<metadata>;.*)?:(?<data>.*)/', $fieldName);
+    $regex = sprintf('/^%s(?<metadata>;.*)?:(?<data>.*)/', $fieldName);
     $lines = explode(PHP_EOL, $data);
     foreach ($lines as $line) {
         preg_match_all($regex, $line, $matches, PREG_SET_ORDER);
@@ -129,6 +131,13 @@ function getVcardsFromArray(array $arr): array
     foreach ($arr as $data) {
         $card = new vCard();
         $card->setFullName(getFullname($data));
+        list($first, $last) = getFirstAndLastNames($data);
+        if ($first !== null) {
+            $card->setFirstName($first);
+        }
+        if ($last !== null) {
+            $card->setLastName($last);
+        }
         $card->setEmails(getEmails($data));
         $card->setTels(getTels($data));
 
@@ -155,4 +164,14 @@ function getEmails(string $data): array
 function getTels(string $data): array
 {
     return getField('TEL', $data, true);
+}
+
+function getFirstAndLastNames(string $data): array
+{
+    $names = getField('N', $data);
+    if ($names === null) {
+        return [null, null];
+    }
+    $names = explode(';', $names);
+    return [$names[1] ?? null, $names[0] ?? null];
 }
