@@ -9,8 +9,6 @@ use \Twig\Environment;
 
 $file = __DIR__ . "/vcards.vcf";
 
-
-
 $vcardData = splitVcardData($file);
 
 $cards = getVcardsFromArray($vcardData);
@@ -30,7 +28,11 @@ foreach ($cards as $card) {
 $loader = new FilesystemLoader(__DIR__ . '/templates');
 $twig = new Environment($loader);
 
-echo $twig->render('vcf.html.twig', ['cards' => $cards, 'sorted_cards' => $sortedCards]);
+if (isset($_GET['csv'])) {
+    export_to_csv($cards, 'vcards.csv');
+} else {
+    echo $twig->render('vcf.html.twig', ['cards' => $cards, 'sorted_cards' => $sortedCards]);
+}
 
 function splitVcardData(string $file): array
 {
@@ -116,15 +118,15 @@ function getLine(string $lineContents, ?Metadata $metadata)
     }
 
     if ($metadata->getHome() === true) {
-        $lineContents = '🏠' . $lineContents;
+        // $lineContents = '🏠' . $lineContents;
     }
 
     if ($metadata->getCellPhone() === true) {
-        $lineContents = '📱' . $lineContents;
+        // $lineContents = '📱' . $lineContents;
     }
 
     if ($metadata->getPref() === true) {
-        $lineContents = '⭐' . $lineContents;
+        // $lineContents = '⭐' . $lineContents;
     }
 
     return $lineContents;
@@ -147,8 +149,8 @@ function getVcardsFromArray(array $arr): array
         if ($last !== null) {
             $card->setLastName($last);
         }
-        $card->setEmails(getEmails($data));
-        $card->setTels(getTels($data));
+        $card->setEmails(array_unique(getEmails($data)));
+        $card->setTels(array_unique(getTels($data)));
 
 
         if (!$card->isEmpty()) {
@@ -183,4 +185,36 @@ function getFirstAndLastNames(string $data): array
     }
     $names = explode(';', $names);
     return [$names[1] ?? null, $names[0] ?? null];
+}
+
+/**
+ * @var []vCard $card
+ */
+function export_to_csv(array $cards, string $fileName)
+{
+    $csv = fopen($fileName, 'w+');
+
+    $headers = ['Last name', 'First Name', 'Full name', 'tel 1', 'tel 2', 'tel 3', 'mail 1', 'mail 2', 'mail 3'];
+    fputcsv($csv, $headers);
+
+    foreach ($cards as $card) {
+        fputcsv($csv, [
+            $card->getLastName(),
+            $card->getFirstName(),
+            $card->getFullname(),
+            $card->getTels()[0] ?? null,
+            $card->getTels()[1] ?? null,
+            $card->getTels()[1] ?? null,
+            $card->getEmails()[0] ?? null,
+            $card->getEmails()[1] ?? null,
+            $card->getEmails()[2] ?? null,
+        ]);
+    }
+
+    fclose($csv);
+
+    header('Content-type: text/csv');
+    header(sprintf('Content-disposition:attachment; filename="%s"', $fileName));
+    readfile($fileName);
+    unlink($fileName);
 }

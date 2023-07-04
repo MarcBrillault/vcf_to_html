@@ -6,6 +6,7 @@
     <body>
         <div class="container-lg">
             <h1>Tous les contacts ({{ cards|length }})</h1>
+            <h2><a href="?csv">Exporter en CSV</a></h2>
             <div class="row">
                 {% for letter, cards in sorted_cards %}
                     <h2>{{ letter }}</h2>
